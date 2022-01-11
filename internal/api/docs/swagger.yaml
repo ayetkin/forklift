@@ -1,0 +1,396 @@
+definitions:
+  entity.Flavor:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  entity.Key:
+    properties:
+      fingerprint:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      size:
+        type: number
+    type: object
+  entity.MigrationRequest:
+    properties:
+      dc:
+        type: string
+      flavor:
+        $ref: '#/definitions/entity.Flavor'
+      instanceName:
+        type: string
+      key:
+        $ref: '#/definitions/entity.Key'
+      messageId:
+        type: string
+      network:
+        $ref: '#/definitions/entity.Network'
+      project:
+        $ref: '#/definitions/entity.Project'
+      publicNetwork:
+        $ref: '#/definitions/entity.Network'
+      securityGroup:
+        $ref: '#/definitions/entity.SecurityGroup'
+      vmName:
+        type: string
+    type: object
+  entity.Network:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      subnets:
+        items:
+          type: string
+        type: array
+    type: object
+  entity.Project:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  entity.SecurityGroup:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  model.RetryMigrationRequest:
+    properties:
+      dc:
+        type: string
+      flavor:
+        $ref: '#/definitions/entity.Flavor'
+      instanceName:
+        type: string
+      key:
+        $ref: '#/definitions/entity.Key'
+      messageId:
+        type: string
+      network:
+        $ref: '#/definitions/entity.Network'
+      project:
+        $ref: '#/definitions/entity.Project'
+      publicNetwork:
+        $ref: '#/definitions/entity.Network'
+      securityGroup:
+        $ref: '#/definitions/entity.SecurityGroup'
+      vmName:
+        type: string
+    type: object
+  model.VmListRequest:
+    properties:
+      dc:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /api/migration/delete/{messageID}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Message ID
+        in: path
+        name: messageId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      tags:
+      - Migration
+  /api/migration/list:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      tags:
+      - Migration
+  /api/migration/retry:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.RetryMigrationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      tags:
+      - Migration
+  /api/migration/start:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.MigrationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      tags:
+      - Migration
+  /api/openstack/flavorList:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      tags:
+      - Openstack
+  /api/openstack/keyList:
+    get:
+      parameters:
+      - description: project
+        in: query
+        name: project
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      tags:
+      - Openstack
+  /api/openstack/networkList:
+    get:
+      parameters:
+      - description: project
+        in: query
+        name: project
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      tags:
+      - Openstack
+  /api/openstack/projectList:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      tags:
+      - Openstack
+  /api/openstack/securityGroupList:
+    get:
+      parameters:
+      - description: project
+        in: query
+        name: project
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      tags:
+      - Openstack
+  /api/user:
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      tags:
+      - User
+  /api/vcenter/dcList:
+    get:
+      description: Get all dc list
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get all dc list
+      tags:
+      - vCenter
+  /api/vcenter/vmList:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.VmListRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      tags:
+      - vCenter
+swagger: "2.0"

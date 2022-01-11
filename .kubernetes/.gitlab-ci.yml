@@ -1,0 +1,73 @@
+stages:
+  - deploy-test
+  - deploy-prod
+
+.deploy: &deploy |
+  kubectl create secret docker-registry $CI_PROJECT_ROOT_NAMESPACE-secret --docker-server=$CI_REGISTRY --docker-username=$DEPLOY_USER --docker-password=$DEPLOY_TOKEN --dry-run -o yaml | kubectl apply -f -
+  cat .kubernetes/service.yaml | envsubst | kubectl apply --record=true -f -
+  kubectl create configmap forklift-config --from-file .configs/ -o yaml --dry-run | kubectl -n $NAMESPACE apply -f -
+
+  if [ "$KIND" == "consumer" ]; then
+    cat .kubernetes/deployment-consumer.yaml | envsubst | kubectl apply --record=true -f -
+    cat .kubernetes/pvc.yaml | envsubst | kubectl apply --record=true -f -
+  fi
+
+  if [ "$KIND" == "api" ]; then
+    cat .kubernetes/deployment-api.yaml | envsubst | kubectl apply --record=true -f -
+    cat .kubernetes/ingress.yaml | envsubst | kubectl apply --record=true -f -
+  fi
+
+variables: &kubernetes-test
+  KUBERNETES: devops-k8s-test
+  ENV: test
+  REPLICAS: $REPLICAS_TEST
+  DOMAIN: $DOMAIN_TEST
+  STORAGE: $STORAGE_TEST
+
+variables: &kubernetes-prod
+  KUBERNETES: devops-k8s-av
+  ENV: prod
+  REPLICAS: $REPLICAS_PROD
+  DOMAIN: $DOMAIN_PROD
+  STORAGE: $STORAGE_PROD
+
+deploy-test:
+  stage: deploy-test
+  image: roffe/kubectl
+  variables:
+    <<: *kubernetes-test
+  allow_failure: false
+  environment:
+    name: $KUBERNETES/$APP
+    kubernetes:
+      namespace: $NAMESPACE
+  script:
+    - *deploy
+  after_script:
+    - kubectl rollout status deployment ${APP}
+  timeout: 5 minutes
+  tags:
+    - k8s
+  only:
+    - master
+
+deploy-av:
+  stage: deploy-prod
+  image: roffe/kubectl
+  variables:
+    <<: *kubernetes-prod
+  allow_failure: false
+  environment:
+    name: $KUBERNETES/$APP
+    kubernetes:
+      namespace: $NAMESPACE
+  script:
+    - *deploy
+  after_script:
+    - kubectl rollout status deployment ${APP}
+  timeout: 5 minutes
+  when: manual
+  tags:
+    - k8s
+  only:
+    - master

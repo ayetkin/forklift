@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${APP}
+  labels:
+    app: ${APP}
+spec:
+  replicas: ${REPLICAS}
+  selector:
+    matchLabels:
+      app: ${APP}
+  template:
+    metadata:
+      labels:
+        app: ${APP}
+    spec:
+      containers:
+        - name: ${APP}
+          image: ${CI_REGISTRY_IMAGE}:${TAG}
+          command: ["./main"]
+          args: ["${APP}", "--config", "/app/.configs/config.yaml"]
+          volumeMounts:
+            - name: forklift-config
+              mountPath: /app/.configs/
+              readOnly: true
+          livenessProbe:
+            httpGet:
+              path: /api/healthz
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 3
+            failureThreshold: 1
+          readinessProbe:
+            httpGet:
+              path: /api/status
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+          resources:
+            limits:
+              memory: 200Mi
+              cpu: 250m
+            requests:
+              memory: 50Mi
+              cpu: 50m
+      terminationGracePeriodSeconds: 30
+      imagePullSecrets:
+        - name: $CI_PROJECT_ROOT_NAMESPACE-secret
+      volumes:
+        - name: forklift-config
+          configMap:
+            name: forklift-config
+            items:
+              - key: config-${ENV}.yaml
+                path: config.yaml

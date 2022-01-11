@@ -1,0 +1,10 @@
+.git
+.idea
+AUTHORS.md
+CONTRIBUTING.md
+LICENSE
+Makefile
+README.md
+kubernetes
+.gitlab-ci.yml
+vendor/
